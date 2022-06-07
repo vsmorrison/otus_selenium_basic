@@ -6,19 +6,22 @@ DRIVERS = os.path.expanduser("~/drivers")
 
 
 def pytest_addoption(parser):
-    parser.addoption("--browser", default="chrome", help="chrome browser")
+    parser.addoption("--browser", default="chrome")
+    parser.addoption("--url", default="http://192.168.31.140:8081/")
 
 
 @pytest.fixture(scope="module")
-def driver(request):
+def browser(request):
     browser_name = request.config.getoption("--browser")
+    url = request.config.getoption("--url")
     if browser_name == "chrome":
-        browser = webdriver.Chrome(executable_path=f"{DRIVERS}/chromedriver")
+        driver = webdriver.Chrome(executable_path=f"{DRIVERS}/chromedriver")
     elif browser_name == "firefox":
-        browser = webdriver.Firefox(executable_path=f"{DRIVERS}/geckodriver")
+        driver = webdriver.Firefox(executable_path=f"{DRIVERS}/geckodriver")
     elif browser_name == "safari":
-        browser = webdriver.Safari()
+        driver = webdriver.Safari()
     else:
         raise ValueError("Browser not found")
-    request.addfinalizer(browser.close)
-    return browser
+    driver.get(url)
+    request.addfinalizer(driver.close)
+    return driver
